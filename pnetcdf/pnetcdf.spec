@@ -9,16 +9,13 @@ Source0:        https://parallel-netcdf.github.io/Release/%{name}-%{version}.tar
 
 BuildRequires:  gcc-c++
 BuildRequires:  openmpi-devel
-BuildRequires:  hdf5-openmpi-devel
-BuildRequires:  netcdf-openmpi-devel
-BuildRequires:  make
-BuildRequires:  autoconf
-BuildRequires:  automake
-BuildRequires:  libtool
+BuildRequires:  m4
+
+# Disable automatic requirement detection for MPI libraries
+%global __requires_exclude ^libmpi.*\\.so.*
 
 Requires:       openmpi
-Requires:       hdf5-openmpi
-Requires:       netcdf-openmpi
+Requires:       environment-modules
 
 %description
 PNetCDF is a high-performance parallel I/O library for accessing files in 
@@ -56,6 +53,16 @@ make install DESTDIR=%{buildroot}
 
 # Remove libtool archives
 find %{buildroot} -name "*.la" -delete
+
+%post
+# Create ld.so.conf entry for OpenMPI libraries
+echo "/usr/lib64/openmpi/lib" > /etc/ld.so.conf.d/openmpi-x86_64.conf
+/sbin/ldconfig
+
+%postun
+# Remove ld.so.conf entry
+rm -f /etc/ld.so.conf.d/openmpi-x86_64.conf
+/sbin/ldconfig
 
 %files
 %license COPYING
