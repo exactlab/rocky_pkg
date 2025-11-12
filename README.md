@@ -1,51 +1,77 @@
 # Rocky Linux Package Builder
 
-Base container image for building Rocky Linux packages using Rocky Devtools.
+Containerized environment for building Rocky Linux 9 RPM packages with support for MPI-enabled packages like PNetCDF.
 
-## Usage
+## Project Structure
 
-### 1. Build the base image
+```
+rocky_pkg/
+├── Containerfile          # Base Rocky Linux 9 build environment
+├── pnetcdf/
+│   ├── Containerfile.pnetcdf  # PNetCDF-specific dependencies
+│   ├── Makefile           # Build automation
+│   ├── pnetcdf.spec       # RPM spec file
+│   └── pnetcdf-1.12.3.tar.gz # Source tarball
+```
+
+## PNetCDF Package
+
+### Build Process
+
+1. **Build the base image:**
 ```bash
 podman build -t rocky-pkg-builder .
 ```
 
-### 2. Create package-specific image
-Create a Containerfile for each package to install its dependencies:
-```dockerfile
-FROM rocky-pkg-builder
-RUN rockyget <package-name>
-# Install package-specific build dependencies here
-```
-
-Build the package-specific image:
+2. **Build PNetCDF-specific image:**
 ```bash
-podman build -f Containerfile.<package-name> -t rocky-pkg-<package-name> .
+cd pnetcdf
+make image
 ```
 
-### 3. Run container with volumes
+3. **Download source (if needed):**
 ```bash
-podman run -it --rm \
-  -v ./sources:/home/builder/sources:Z \
-  -v ./output:/home/builder/output:Z \
-  rocky-pkg-<package-name>
+make source
 ```
 
-This allows you to:
-- Modify source code in `./sources/`
-- Access build artifacts in `./output/`
-- Iterate on builds without rebuilding the container
-- Debug and tweak setup easily
+4. **Run interactive container:**
+```bash
+make interactive
+```
 
-## Container Features
+5. **Build RPM (inside container):**
+```bash
+make build
+```
 
-- Rocky Linux 9 base
-- Rocky Devtools pre-installed
-- Non-root `builder` user
-- Development tools and RPM build environment
-- Ready for volume mounting
+6. **Copy RPMs to host:**
+```bash
+make copy-rpms
+```
 
-## Build Environment
+### Features
 
-- Working directory: `/home/builder`
-- Build logs: `~/rocky/builds/<package>/r8/`
-- Source RPMs: `~/rocky/rpms/<package>/`
+- OpenMPI 4.1.1 integration with environment modules
+- Automatic MPI library dependency handling
+- Fortran and C++ bindings support
+- Rocky Linux 9 compatibility
+
+### Installation
+
+The built RPMs include post-install scripts to configure MPI library paths:
+```bash
+sudo dnf install pnetcdf/RPMS/pnetcdf-*.rpm
+```
+
+## Container Architecture
+
+- **Base image**: Rocky Linux 9 with development tools
+- **Builder user**: Non-privileged build environment
+- **Volume mounting**: Host directory mounted as `/home/builder/artifacts`
+- **Artifact extraction**: RPMs copied to host via `make copy-rpms`
+
+## Requirements
+
+- Podman or Docker
+- Rocky Linux 9 host (recommended)
+- OpenMPI runtime for package installation

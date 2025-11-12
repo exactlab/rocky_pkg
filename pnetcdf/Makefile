@@ -25,3 +25,7 @@ image:
 
 source:
 	curl -O "https://parallel-netcdf.github.io/Release/pnetcdf-1.12.3.tar.gz"
+
+copy-rpms:
+	mkdir -p RPMS
+	podman cp $(shell podman ps -q --filter "ancestor=rocky-pkg-pnetcdf"):/home/builder/rpmbuild/RPMS/x86_64/. RPMS/
