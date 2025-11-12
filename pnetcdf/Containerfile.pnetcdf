@@ -1,0 +1,18 @@
+FROM rocky-pkg-builder
+
+# Install PNetCDF build dependencies
+RUN sudo dnf install -y epel-release
+RUN sudo dnf install -y netcdf-devel netcdf-openmpi-devel openmpi-devel hdf5-openmpi-devel
+
+# Download PNetCDF upstream source
+RUN curl -L -o pnetcdf-1.12.3.tar.gz https://parallel-netcdf.github.io/Release/pnetcdf-1.12.3.tar.gz
+
+# Set up OpenMPI environment
+ENV MPI_HOME=/usr/lib64/openmpi
+ENV PATH=$MPI_HOME/bin:$PATH
+ENV LD_LIBRARY_PATH=$MPI_HOME/lib:$LD_LIBRARY_PATH
+
+WORKDIR /home/builder/workspace
+
+USER builder
+CMD ["/bin/bash"]
