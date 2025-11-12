@@ -1,32 +1,47 @@
 # Rocky Linux Package Builder
 
-Containerized environment for building Rocky Linux 9 RPM packages with support for MPI-enabled packages like PNetCDF.
+Containerized environment template for building Rocky Linux 9 RPM packages from
+source code. This project provides a reusable template for packaging any source
+distribution.
 
 ## Project Structure
+
+Sources are packaged in subdirectories.
 
 ```
 rocky_pkg/
 ├── Containerfile          # Base Rocky Linux 9 build environment
-├── pnetcdf/
-│   ├── Containerfile.pnetcdf  # PNetCDF-specific dependencies
+├── <package_name>/
+│   ├── Containerfile.<package_name>  # Package-specific dependencies
 │   ├── Makefile           # Build automation
-│   ├── pnetcdf.spec       # RPM spec file
-│   └── pnetcdf-1.12.3.tar.gz # Source tarball
+│   ├── <package_name>.spec  # RPM spec file
+│   └── <source_tarball>   # Source distribution
 ```
 
-## PNetCDF Package
+## Creating a New Package
 
-### Build Process
+### 1. Prepare Package Directory
+
+Create a directory for your package. You may use the files used to package
+`pnetcdf` as a template:
+
+```bash
+mkdir <package_name>
+cp pnetcdf/Makefile <package_name>/
+cp pnetcdf/Containerfile.pnetcdf <package_name>/Containerfile.<package_name>
+```
+
+### 2. Build Process
 
 1. **Build the base image:**
 ```bash
 podman build -t rocky-pkg-builder .
 ```
 
-2. **Build PNetCDF-specific image:**
+2. **Build package-specific image:**
 ```bash
-cd pnetcdf
-make image
+cd <package_name>
+make image PACKAGE_NAME=<package_name>
 ```
 
 3. **Download source (if needed):**
@@ -49,18 +64,27 @@ make build
 make copy-rpms
 ```
 
-### Features
+### 3. Required Customizations
 
-- OpenMPI 4.1.1 integration with environment modules
-- Automatic MPI library dependency handling
-- Fortran and C++ bindings support
-- Rocky Linux 9 compatibility
+#### Containerfile.<package_name>
+- Update package dependencies
+- Install build tools specific to your package
+- Configure environment variables
+
+#### <package_name>.spec
+- Create RPM spec file defining build process
+- Set dependencies, file lists, and metadata
+- Configure post-install scripts if needed
+
+#### Makefile
+- Update source download URLs
+- Modify build targets as needed
 
 ### Installation
 
-The built RPMs include post-install scripts to configure MPI library paths:
+Install built RPMs:
 ```bash
-sudo dnf install pnetcdf/RPMS/pnetcdf-*.rpm
+sudo dnf install <package_name>/RPMS/<package_name>-*.rpm
 ```
 
 ## Container Architecture
@@ -70,8 +94,16 @@ sudo dnf install pnetcdf/RPMS/pnetcdf-*.rpm
 - **Volume mounting**: Host directory mounted as `/home/builder/artifacts`
 - **Artifact extraction**: RPMs copied to host via `make copy-rpms`
 
+## Example: PNetCDF Package
+
+The `pnetcdf/` directory serves as a complete example implementation
+demonstrating:
+- MPI library integration (OpenMPI 4.1.1)
+- Environment module configuration
+- Fortran and C++ bindings
+- Complex dependency management
+
 ## Requirements
 
 - Podman or Docker
 - Rocky Linux 9 host (recommended)
-- OpenMPI runtime for package installation
