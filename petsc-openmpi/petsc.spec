@@ -18,11 +18,11 @@
 %global _lto_cflags %{nil}
 
 # Testing libpetsc ?
-%bcond_without check
+%bcond_with check
 #
 
 # Python binding and its testing
-%bcond_without python
+%bcond_with python
 # Python tests need Cython
 # Python tests need epydoc (no longer available)
 %bcond_with pycheck
@@ -41,7 +41,7 @@
 %global epoch 0
 %endif
 
-%bcond_without mpich
+%bcond_with mpich
 %if 0%{?fedora} >= 40
 %ifarch %{ix86}
 %bcond_with openmpi
@@ -53,7 +53,7 @@
 %endif
 
 %if %{?__isa_bits:%{__isa_bits}}%{!?__isa_bits:32} == 64
-%bcond_without arch64
+%bcond_with arch64
 %else
 %bcond_with arch64
 %endif
@@ -68,12 +68,12 @@
 
 #
 ## PETSC looks incompatible with serial MUMPS
-%bcond_without mumps_serial
+%bcond_with mumps_serial
 #
 ## Sundials needs mpi ?
 %bcond_with sundials_serial
 #
-%bcond_without superlu
+%bcond_with superlu
 #
 
 ## Suitesparse
@@ -95,7 +95,7 @@
 
 ## Metis
 %bcond_without metis
-%bcond_without metis64
+%bcond_with metis64
 #
 
 # 'scalapack' is required by 'MUMPS'
@@ -375,33 +375,10 @@ Portable Extensible Toolkit for Scientific Computation (developer files).
 
 %package doc
 Summary:    Portable Extensible Toolkit for Scientific Computation (documentation files)
-BuildRequires: python3-sphinx
 BuildArch:  noarch
 %description doc
 Portable Extensible Toolkit for Scientific Computation.
 PDF and HTML documentation files.
-
-%if %{with arch64}
-%package -n petsc64
-Summary: Portable Extensible Toolkit for Scientific Computation (64bit INTEGER)
-%if %{with metis64}
-BuildRequires: metis64-devel >= 5.1.0
-%endif
-
-%description -n petsc64
-PETSc, pronounced PET-see (the S is silent), is a suite of data structures
-and routines for the scalable (parallel) solution of scientific applications
-modeled by partial differential equations (64bit INTEGER).
-
-%package -n petsc64-devel
-Requires:   %{name}64%{?_isa} = %{version}-%{release}
-Requires:   gcc-gfortran%{?_isa}
-Summary:    Portable Extensible Toolkit for Scientific Computation (64bit INTEGER)
-
-%description -n petsc64-devel
-Portable Extensible Toolkit for Scientific Computation (developer files)
-(64bit INTEGER).
-%endif
 
 #############################################################################
 #########
@@ -1147,22 +1124,6 @@ xvfb-run -a make MAKE_NP=$RPM_BUILD_NCPUS all test -C build64 V=1 MPIEXEC='%{_bu
 %files doc
 %license %{name}-%{version}/LICENSE
 %{_pkgdocdir}/
-
-%if %{with arch64}
-%files -n petsc64
-%license build64/LICENSE
-%{_libdir}/libpetsc64.so.3
-%{_libdir}/libpetsc64.so.%{releasever}
-%{_libdir}/libpetsc64.so.%{version}
-
-%files -n petsc64-devel
-%{_libdir}/pkgconfig/PETSc64.pc
-%{_libdir}/pkgconfig/petsc64.pc
-%{_libdir}/%{name}64/
-%{_libdir}/libpetsc64.so
-%{_includedir}/%{name}64/
-%{_fmoddir}/%{name}64/
-%endif
 
 %if %{with openmpi}
 %files openmpi

@@ -1,18 +1,17 @@
-# PNetCDF RPM Build Makefile
+# petsc-openmpi RPM Build Makefile
 
 # .PHONY: build clean setup prepare spec-only interactive image
 .PHONY: interactive image link nuke
 
-nuke:
+clean:
 	rm -rf /home/builder/rpmbuild/
-	rpmdev-setuptree
 
 unpack:
 	rpm -ivh /home/builder/artifacts/*.src.rpm
 	cp /home/builder/artifacts/*.spec /home/builder/rpmbuild/SPECS
 
-build: link
-	rpmbuild -bb rpmbuild/SPECS/pnetcdf.spec
+build: unpack
+	rpmbuild -bb rpmbuild/SPECS/petsc.spec
 
 # Run interactive container from host (run from host directory)
 interactive:

@@ -25,7 +25,11 @@ RUN dnf install -y \
     fftw-devel \
     fftw-openmpi-devel \
     valgrind-devel \
-    python3-numpy \
+    && dnf clean all
+
+# Install additional dependencies needed for serial builds
+RUN dnf install -y \
+    hdf5-devel \
     && dnf clean all
 
 USER builder
