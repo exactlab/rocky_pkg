@@ -103,6 +103,20 @@ demonstrating:
 - Fortran and C++ bindings
 - Complex dependency management
 
+## Built Packages
+
+This project builds the following RPM packages:
+
+- **pnetcdf/**
+  - `pnetcdf`
+  - `pnetcdf-devel`
+- **petsc-openmpi/**
+  - `petsc`
+  - `petsc-devel`
+  - `petsc-doc`
+  - `petsc-openmpi`
+  - `petsc-openmpi-devel`
+
 ## Requirements
 
 - Podman or Docker
