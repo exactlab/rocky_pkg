@@ -1,0 +1,43 @@
+# rocky-pkg-petsc-openmpi
+FROM rocky-pkg-builder
+
+USER root
+
+# Install PETSc build dependencies
+RUN dnf install -y \
+    gcc gcc-c++ gcc-gfortran cmake make \
+    openmpi-devel \
+    hdf5-openmpi-devel \
+    flexiblas-devel \
+    metis-devel \
+    chrpath \
+    libX11-devel \
+    python3-devel \
+    python3-setuptools \
+    pcre2-devel \
+    tcsh \
+    xorg-x11-server-Xvfb \
+    ptscotch-openmpi-devel \
+    scalapack-openmpi-devel \
+    MUMPS-openmpi-devel \
+    superlu_dist-openmpi-devel \
+    hypre-openmpi-devel \
+    fftw-devel \
+    fftw-openmpi-devel \
+    valgrind-devel \
+    python3-numpy \
+    && dnf clean all
+
+USER builder
+
+# Set up OpenMPI environment
+ENV MPI_HOME=/usr/lib64/openmpi
+ENV PATH=$MPI_HOME/bin:$PATH
+ENV LD_LIBRARY_PATH=$MPI_HOME/lib:$LD_LIBRARY_PATH
+
+WORKDIR /home/builder
+
+# Assume that artifacts are going to be mounted in ~/artifacts/
+RUN ln -s artifacts/Makefile .
+
+CMD ["/bin/bash"]
